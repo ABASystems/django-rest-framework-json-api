@@ -37,3 +37,7 @@ pip-delete-this-directory.txt
 
 # VirtualEnv
 .venv/
+
+# Developers
+manage.py
+.DS_Store
