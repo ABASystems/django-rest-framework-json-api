@@ -1,16 +1,14 @@
-from rest_framework import exceptions
-from rest_framework import viewsets
 import rest_framework.parsers
 import rest_framework.renderers
+from example.models import Author, Blog, Comment, Entry
+from example.serializers import AuthorSerializer, BlogSerializer, CommentSerializer, EntrySerializer
+from rest_framework import exceptions, viewsets
+
 import rest_framework_json_api.metadata
 import rest_framework_json_api.parsers
 import rest_framework_json_api.renderers
-from rest_framework_json_api.views import RelationshipView
-from example.models import Blog, Entry, Author, Comment
-from example.serializers import (
-    BlogSerializer, EntrySerializer, AuthorSerializer, CommentSerializer)
-
 from rest_framework_json_api.utils import format_drf_errors
+from rest_framework_json_api.views import RelationshipView
 
 HTTP_422_UNPROCESSABLE_ENTITY = 422
 
@@ -70,6 +68,12 @@ class AuthorViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if 'author' in self.request.GET.get('include', '').split(','):
+            qs = qs.prefetch_related('author')
+        return qs
 
 
 class EntryRelationshipView(RelationshipView):
