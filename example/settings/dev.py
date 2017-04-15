@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'rest_framework',
     'example',
+    'debug_toolbar',
 ]
 
 TEMPLATES = [
@@ -57,7 +58,11 @@ SECRET_KEY = 'abc123'
 
 PASSWORD_HASHERS = ('django.contrib.auth.hashers.UnsaltedMD5PasswordHasher', )
 
-MIDDLEWARE_CLASSES = ()
+MIDDLEWARE_CLASSES = (
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+)
+
+INTERNAL_IPS = ('127.0.0.1', )
 
 JSON_API_FORMAT_KEYS = 'camelize'
 JSON_API_FORMAT_TYPES = 'camelize'

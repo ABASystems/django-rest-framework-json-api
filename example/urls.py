@@ -1,7 +1,8 @@
-from django.conf.urls import include, url
+from example.views import AuthorViewSet, BlogViewSet, CommentViewSet, EntryViewSet
 from rest_framework import routers
 
-from example.views import BlogViewSet, EntryViewSet, AuthorViewSet, CommentViewSet
+from django.conf import settings
+from django.conf.urls import include, url
 
 router = routers.DefaultRouter(trailing_slash=False)
 
@@ -13,3 +14,10 @@ router.register(r'comments', CommentViewSet)
 urlpatterns = [
     url(r'^', include(router.urls)),
 ]
+
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
