@@ -5,12 +5,13 @@ import copy
 from collections import OrderedDict
 
 import inflection
-from django.db.models import Manager, QuerySet
-from django.utils import six, encoding
-from rest_framework import relations
-from rest_framework import renderers
-from rest_framework.serializers import BaseSerializer, Serializer, ListSerializer
+from rest_framework import relations, renderers
+from rest_framework.serializers import BaseSerializer, ListSerializer, Serializer
 from rest_framework.settings import api_settings
+
+from django.conf import settings
+from django.db.models import Manager, QuerySet
+from django.utils import encoding, six
 
 from . import utils
 
@@ -117,20 +118,22 @@ class JSONRenderer(renderers.JSONRenderer):
                 continue
 
             if isinstance(field, ResourceRelatedField):
-                resolved, relation_instance = utils.get_relation_instance(resource_instance, source, field.parent)
-                if not resolved:
-                    continue
-
                 # special case for ResourceRelatedField
                 relation_data = {
                     'data': resource.get(field_name)
                 }
 
-                field_links = field.get_links(resource_instance)
-                relation_data.update(
-                    {'links': field_links}
-                    if field_links else dict()
-                )
+                if not getattr(settings, 'JSON_API_FAST_DISABLELINKS', False):
+                    resolved, relation_instance = utils.get_relation_instance(resource_instance, source, field.parent)
+                    if not resolved:
+                        continue
+
+                    field_links = field.get_links(resource_instance)
+                    relation_data.update(
+                        {'links': field_links}
+                        if field_links else dict()
+                    )
+
                 data.update({field_name: relation_data})
                 continue
 
