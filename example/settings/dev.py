@@ -83,9 +83,31 @@ REST_FRAMEWORK = {
         # If you're performance testing, you will want to use the browseable API
         # without forms, as the forms can generate their own queries.
         # If performance testing, enable:
-        # 'example.utils.BrowsableAPIRendererWithoutForms',
+        'example.utils.BrowsableAPIRendererWithoutForms',
         # Otherwise, to play around with the browseable API, enable:
-        'rest_framework.renderers.BrowsableAPIRenderer',
+        #'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_METADATA_CLASS': 'rest_framework_json_api.metadata.JSONAPIMetadata',
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        },
+    },
+}
+
+# Log the database calls
+LOGGING['loggers']['django.db.backends'] = {
+    'level': 'DEBUG',
 }

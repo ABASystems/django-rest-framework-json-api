@@ -1,10 +1,10 @@
 import rest_framework.parsers
 import rest_framework.renderers
-from rest_framework import exceptions
-
 import rest_framework_json_api.metadata
 import rest_framework_json_api.parsers
 import rest_framework_json_api.renderers
+from rest_framework import exceptions
+from rest_framework.viewsets import ModelViewSet as NormalModelViewSet
 from rest_framework_json_api.utils import format_drf_errors
 from rest_framework_json_api.views import ModelViewSet, RelationshipView
 
@@ -15,7 +15,8 @@ from example.serializers import (
     CommentSerializer,
     CompanySerializer,
     EntrySerializer,
-    ProjectSerializer
+    ProjectSerializer,
+    SimpleCommentSerializer
 )
 
 HTTP_422_UNPROCESSABLE_ENTITY = 422
@@ -74,13 +75,17 @@ class AuthorViewSet(ModelViewSet):
 
 
 class CommentViewSet(ModelViewSet):
-    queryset = Comment.objects.select_related('author', 'entry')
+    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     prefetch_for_includes = {
         '__all__': [],
-        'author': ['author', 'author__bio', 'author__entries'],
-        'entry': ['author', 'author__bio', 'author__entries']
+        'author': ['author', 'author__bio'],
+        'entry': ['entry']
     }
+
+
+class SimpleCommentViewSet(CommentViewSet):
+    serializer_class = SimpleCommentSerializer
 
 
 class CompanyViewset(ModelViewSet):

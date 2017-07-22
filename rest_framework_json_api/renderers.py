@@ -124,23 +124,23 @@ class JSONRenderer(renderers.JSONRenderer):
                 continue
 
             if isinstance(field, ResourceRelatedField):
-                resolved, relation_instance = utils.get_relation_instance(
-                    resource_instance, source, field.parent
-                )
-                if not resolved:
-                    continue
+                # resolved, relation_instance = utils.get_relation_instance(
+                #     resource_instance, source, field.parent
+                # )
+                # if not resolved:
+                #     continue
 
                 # special case for ResourceRelatedField
                 relation_data = {
                     'data': resource.get(field_name)
                 }
-
-                field_links = field.get_links(
-                    resource_instance, field.related_link_lookup_field)
-                relation_data.update(
-                    {'links': field_links}
-                    if field_links else dict()
-                )
+                #
+                # field_links = field.get_links(
+                #     resource_instance, field.related_link_lookup_field)
+                # relation_data.update(
+                #     {'links': field_links}
+                #     if field_links else dict()
+                # )
                 data.update({field_name: relation_data})
                 continue
 
@@ -339,6 +339,7 @@ class JSONRenderer(renderers.JSONRenderer):
             relation_instance = cls.extract_relation_instance(
                 field_name, field, resource_instance, current_serializer
             )
+
             if isinstance(relation_instance, Manager):
                 relation_instance = relation_instance.all()
 
@@ -353,6 +354,7 @@ class JSONRenderer(renderers.JSONRenderer):
                 serializer_data = field.data
 
             if isinstance(field, relations.RelatedField):
+                # @this is where the next query explosion happens
                 if relation_instance is None:
                     continue
 

@@ -41,7 +41,8 @@ class PerformanceTestCase(APITestCase):
         2. The SELECT query for the set
         """
         with self.assertNumQueries(2):
-            response = self.client.get('/comments?page_size=25')
+            response = self.client.get('/simplecomments?page_size=25')
+            self.assertEqual(response.status_code, 200)
             self.assertEqual(len(response.data['results']), 25)
 
     def test_query_count_include_author(self):
@@ -53,5 +54,5 @@ class PerformanceTestCase(APITestCase):
         3. Entries prefetched
         """
         with self.assertNumQueries(4):
-            response = self.client.get('/comments?include=author&page_size=25')
+            response = self.client.get('/simplecomments?include=author&page_size=25')
             self.assertEqual(len(response.data['results']), 25)

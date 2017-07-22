@@ -8,7 +8,8 @@ from example.views import (
     CommentViewSet,
     CompanyViewset,
     EntryViewSet,
-    ProjectViewset
+    ProjectViewset,
+    SimpleCommentViewSet
 )
 
 router = routers.DefaultRouter(trailing_slash=False)
@@ -17,6 +18,7 @@ router.register(r'blogs', BlogViewSet)
 router.register(r'entries', EntryViewSet)
 router.register(r'authors', AuthorViewSet)
 router.register(r'comments', CommentViewSet)
+router.register(r'simplecomments', SimpleCommentViewSet)
 router.register(r'companies', CompanyViewset)
 router.register(r'projects', ProjectViewset)
 

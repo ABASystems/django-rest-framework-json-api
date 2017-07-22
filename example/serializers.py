@@ -2,7 +2,6 @@ from datetime import datetime
 
 import rest_framework
 from packaging import version
-
 from rest_framework_json_api import relations, serializers
 
 from example.models import (
@@ -142,6 +141,17 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         exclude = ('created_at', 'modified_at',)
         # fields = ('entry', 'body', 'author',)
+
+
+class SimpleCommentSerializer(serializers.ModelSerializer):
+    included_serializers = {
+        'entry': EntrySerializer,
+        'author': AuthorSerializer,
+    }
+
+    class Meta:
+        model = Comment
+        fields = ('created_at', 'modified_at', 'entry', 'body', 'author',)
 
 
 class ArtProjectSerializer(serializers.ModelSerializer):
