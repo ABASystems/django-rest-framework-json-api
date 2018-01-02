@@ -1,13 +1,13 @@
 from collections import OrderedDict
 
-from django.db.models.fields import related
-from django.utils.encoding import force_text
 from rest_framework import serializers
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.settings import api_settings
 from rest_framework.utils.field_mapping import ClassLookupDict
+from rest_framework_json_api.utils import get_included_serializers, get_related_resource_type
 
-from rest_framework_json_api.utils import get_related_resource_type
+from django.db.models.fields import related
+from django.utils.encoding import force_text
 
 
 class JSONAPIMetadata(SimpleMetadata):
@@ -83,17 +83,18 @@ class JSONAPIMetadata(SimpleMetadata):
         serializer.fields.pop(api_settings.URL_FIELD_NAME, None)
 
         return OrderedDict([
-            (field_name, self.get_field_info(field))
+            (field_name, self.get_field_info(field, field_name))
             for field_name, field in serializer.fields.items()
         ])
 
-    def get_field_info(self, field):
+    def get_field_info(self, field, field_name):
         """
         Given an instance of a serializer field, return a dictionary
         of metadata about it.
         """
         field_info = OrderedDict()
         serializer = field.parent
+        included_serializers = get_included_serializers(serializer)
 
         if isinstance(field, serializers.ManyRelatedField):
             field_info['type'] = self.type_lookup[field.child_relation]
@@ -110,7 +111,8 @@ class JSONAPIMetadata(SimpleMetadata):
         except AttributeError:
             pass
         else:
-            field_info['relationship_resource'] = get_related_resource_type(field)
+            resource = included_serializers.get(field_name, field)
+            field_info['relationship_resource'] = get_related_resource_type(resource)
 
         field_info['required'] = getattr(field, 'required', False)
 
@@ -126,7 +128,7 @@ class JSONAPIMetadata(SimpleMetadata):
                 field_info[attr] = force_text(value, strings_only=True)
 
         if getattr(field, 'child', None):
-            field_info['child'] = self.get_field_info(field.child)
+            field_info['child'] = self.get_field_info(field.child, field_name)  # TODO: Is `field_name` okay here?
         elif getattr(field, 'fields', None):
             field_info['children'] = self.get_serializer_info(field)
 
