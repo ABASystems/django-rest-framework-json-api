@@ -5,6 +5,7 @@ from rest_framework import exceptions
 import rest_framework_json_api.metadata
 import rest_framework_json_api.parsers
 import rest_framework_json_api.renderers
+from rest_framework_json_api.pagination import PageNumberPagination
 from rest_framework_json_api.utils import format_drf_errors
 from rest_framework_json_api.views import ModelViewSet, RelationshipView
 
@@ -68,18 +69,25 @@ class EntryViewSet(ModelViewSet):
         return EntrySerializer
 
 
+class NoPagination(PageNumberPagination):
+    page_size = None
+
+
+class NonPaginatedEntryViewSet(EntryViewSet):
+    pagination_class = NoPagination
+
+
 class AuthorViewSet(ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
 
 
 class CommentViewSet(ModelViewSet):
-    queryset = Comment.objects.select_related('author', 'entry')
+    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     prefetch_for_includes = {
         '__all__': [],
-        'author': ['author', 'author__bio', 'author__entries', 'author__type'],
-        'entry': ['author', 'author__bio', 'author__entries']
+        'author': ['author__bio', 'author__entries'],
     }
 
 
