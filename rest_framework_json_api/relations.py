@@ -2,8 +2,9 @@ import collections
 import json
 from collections import OrderedDict
 
-import inflection
 import six
+
+import inflection
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import NoReverseMatch
 from django.utils.translation import ugettext_lazy as _
@@ -11,7 +12,6 @@ from rest_framework.fields import MISSING_ERROR_MESSAGE
 from rest_framework.relations import MANY_RELATION_KWARGS, PrimaryKeyRelatedField
 from rest_framework.reverse import reverse
 from rest_framework.serializers import Serializer
-
 from rest_framework_json_api.exceptions import Conflict
 from rest_framework_json_api.utils import (
     Hyperlink,
@@ -27,6 +27,12 @@ LINKS_PARAMS = [
     'related_link_lookup_field',
     'related_link_url_kwarg'
 ]
+
+# Cache the inflections we've used in a global table. This
+# saves significant time.
+# TODO: Could this possible cause a problem? I don't think so...
+INFLECTION_TABLE = {
+}
 
 
 class ResourceRelatedField(PrimaryKeyRelatedField):
@@ -193,10 +199,13 @@ class ResourceRelatedField(PrimaryKeyRelatedField):
 
         if parent is not None:
             # accept both singular and plural versions of field_name
-            field_names = [
-                inflection.singularize(field_name),
-                inflection.pluralize(field_name)
-            ]
+            field_names = INFLECTION_TABLE.get(field_name)
+            if not field_names:
+                field_names = [
+                    inflection.singularize(field_name),
+                    inflection.pluralize(field_name)
+                ]
+                INFLECTION_TABLE[field_name] = field_names
             includes = get_included_serializers(parent)
             for field in field_names:
                 if field in includes.keys():
