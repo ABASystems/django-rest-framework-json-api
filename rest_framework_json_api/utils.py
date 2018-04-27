@@ -241,6 +241,8 @@ def get_related_resource_type(relation):
     elif hasattr(relation, 'model'):
         # the model type was explicitly passed as a kwarg to ResourceRelatedField
         relation_model = relation.model
+    elif hasattr(relation, 'queryset') and relation.queryset is not None:  # TODO: Is this a problem?
+        relation_model = relation.queryset.model
     elif hasattr(relation, 'get_queryset') and relation.get_queryset() is not None:
         relation_model = relation.get_queryset().model
     elif (
@@ -341,7 +343,14 @@ def get_default_included_resources_from_serializer(serializer):
 
 
 def get_included_serializers(serializer):
-    included_serializers = copy.copy(getattr(serializer, 'included_serializers', dict()))
+    # included_serializers = copy.copy(getattr(serializer, 'included_serializers', dict()))
+    try:
+        if inspect.isclass(serializer):
+            included_serializers = serializer.included_serializers
+        else:
+            included_serializers = serializer.__class__.included_serializers
+    except AttributeError:
+        included_serializers = {}
 
     for name, value in six.iteritems(included_serializers):
         if not isinstance(value, type):

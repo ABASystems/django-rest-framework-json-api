@@ -1,9 +1,6 @@
 import inflection
-from django.db.models.query import QuerySet
-from django.utils.translation import ugettext_lazy as _
 from rest_framework.exceptions import ParseError
 from rest_framework.serializers import *  # noqa: F403
-
 from rest_framework_json_api.exceptions import Conflict
 from rest_framework_json_api.relations import ResourceRelatedField
 from rest_framework_json_api.utils import (
@@ -11,8 +8,12 @@ from rest_framework_json_api.utils import (
     get_included_serializers,
     get_resource_type_from_instance,
     get_resource_type_from_model,
-    get_resource_type_from_serializer
+    get_resource_type_from_serializer,
 )
+
+from django.conf import settings
+from django.db.models.query import QuerySet
+from django.utils.translation import ugettext_lazy as _
 
 
 class ResourceIdentifierObjectSerializer(BaseSerializer):
@@ -106,12 +107,13 @@ class IncludedResourcesValidationMixin(object):
                 validate_path(this_included_serializer, new_included_field_path, path)
 
         if request and view:
-            included_resources = get_included_resources(request)
-            for included_field_name in included_resources:
-                included_field_path = included_field_name.split('.')
-                this_serializer_class = view.get_serializer_class()
-                # lets validate the current path
-                validate_path(this_serializer_class, included_field_path, included_field_name)
+            if getattr(settings, 'DRFJSONAPI_DEBUG', False):
+                included_resources = get_included_resources(request)
+                for included_field_name in included_resources:
+                    included_field_path = included_field_name.split('.')
+                    this_serializer_class = view.get_serializer_class()
+                    # lets validate the current path
+                    validate_path(this_serializer_class, included_field_path, included_field_name)
 
         super(IncludedResourcesValidationMixin, self).__init__(*args, **kwargs)
 
