@@ -197,6 +197,14 @@ def get_related_resource_type(relation):
         # For ManyToMany relationships, get the model from the child
         # serializer of the list serializer
         relation_model = relation.child.Meta.model
+    # Check for tracked fields using FieldTracker from django-model-utils:
+    # https://github.com/jazzband/django-model-utils/blob/2bc7c47157a8df74b8d802b33133359e77de6916/model_utils/tracker.py#L222
+    elif (
+        hasattr(relation, 'descriptor') and
+        hasattr(relation.descriptor, 'rel') and
+        hasattr(relation.descriptor.rel, 'model')
+    ):
+        relation_model = relation.descriptor.rel.model
     else:
         parent_serializer = relation.parent
         parent_model = None
